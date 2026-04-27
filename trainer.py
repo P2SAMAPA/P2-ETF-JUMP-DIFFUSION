@@ -37,8 +37,10 @@ def fit_and_forecast(ret_series, macro_series=None, lambda_cap=10.0):
 def compute_universe_results(tickers, df_master, macro_df, date_mask=None, lambda_cap=config.LAMBDA_CAP_DAILY):
     """Fit jump‑diffusion for each ticker on a specific data slice (or full history)."""
     if date_mask is not None:
-        df = df_master.loc[date_mask]          # already has Date column
-        macro_slice = macro_df.loc[date_mask]
+        # Align mask to macro_df.index
+        aligned_mask = date_mask.reindex(macro_df.index, fill_value=False)
+        df = df_master.loc[date_mask]
+        macro_slice = macro_df.loc[aligned_mask]
     else:
         df = df_master
         macro_slice = macro_df
@@ -115,8 +117,9 @@ def main():
         print(f"\n=== {universe_name} ===")
         universe_out = {}
 
-        # Daily (504d)
-        daily_mask = (df_master['Date'] >= df_master['Date'].iloc[-config.DAILY_LOOKBACK])
+        # Daily (504d) – use a boolean mask derived from df_master['Date']
+        daily_cutoff = df_master['Date'].iloc[-config.DAILY_LOOKBACK]
+        daily_mask = df_master['Date'] >= daily_cutoff
         daily_results, daily_top3 = compute_universe_results(
             tickers, df_master, macro_df, daily_mask, config.LAMBDA_CAP_DAILY)
         universe_out['daily'] = {'top_picks': daily_top3, 'universes': daily_results}
