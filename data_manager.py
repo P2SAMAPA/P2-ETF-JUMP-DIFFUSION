@@ -29,3 +29,10 @@ def prepare_returns_series(df_wide: pd.DataFrame, ticker: str) -> pd.Series:
     prices = df_wide.set_index('Date')[ticker].dropna()
     returns = np.log(prices / prices.shift(1)).dropna()
     return returns
+
+def prepare_macro_features(df_wide: pd.DataFrame) -> pd.DataFrame:
+    """Extract macro columns and return as DataFrame with Date index."""
+    macro_cols = [c for c in config.MACRO_COLS if c in df_wide.columns]
+    macro_df = df_wide[['Date'] + macro_cols].copy()
+    macro_df = macro_df.set_index('Date').ffill().dropna()
+    return macro_df
