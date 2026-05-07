@@ -2,7 +2,7 @@ name: Daily Jump-Diffusion Run
 
 on:
   schedule:
-    - cron: '0 20 * * 1-5'
+    - cron: '0 07 * * 1-5'
   workflow_dispatch:
 
 jobs:
